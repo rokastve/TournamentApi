@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TournamentAPI.Services;
 
 namespace TournamentApi
 {
@@ -35,7 +34,6 @@ namespace TournamentApi
         {
             services.AddDbContext<TournamentContext>(opt => opt.UseMySQL("server=elniavabalis.serveriai.lt;database=rostlt_db;user=rostlt_web;password=KtuWebApi19"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddTransient<AccountService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

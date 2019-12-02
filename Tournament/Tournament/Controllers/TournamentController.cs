@@ -93,24 +93,35 @@ namespace TournamentApi.Controllers
 
             return tournamentItems;
         }
-        [Authorize(Roles = "User,Admin")]
-        // GET: api/Tournament/{id}/team/{id}
+        [Authorize(Roles = "Admin")]
+        // POST: api/Tournament/{id}/team/{id}
         [HttpPost("{tournamentId}/team/{id}")]
         public ActionResult<Team> AddTeamToTournament(long tournamentId, long id)
         {
+            var team = _context.TeamItems.Include(i => i.Players).FirstOrDefault(t => t.Id == id);
             var tournament = _context.TournamentItems
                 .Include(i => i.participants)
                 .ThenInclude(j => j.Players)
                 .Where(i => i.Id == tournamentId)
                 .FirstOrDefault();
+            if (tournament.participants.Count >= tournament.Capacity)
+            {
+                return BadRequest("No more room in tournament");
+            }
+            else if(tournament.participants.Contains(team)){
+                return BadRequest("Team already in this tournament");
+            }
+            else
+            {
+                
+                tournament.participants.Add(team);
+                _context.SaveChanges();
 
-            var team = _context.TeamItems.Include(i => i.Players).FirstOrDefault(t => t.Id == id);
-            tournament.participants.Add(team);
-            _context.SaveChanges();
 
-            return Ok();
+                return CreatedAtAction(nameof(GetTournaments), tournament);
+            }
         }
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Admin")]
         // GET: api/Tournament/{id}/team/{id}
         [HttpDelete("{tournamentId}/team/{id}")]
         public ActionResult<Team> GetTeamFromTournament(long tournamentId, long id)
@@ -125,7 +136,7 @@ namespace TournamentApi.Controllers
             tournament.participants.Remove(team);
             _context.SaveChanges();
 
-            return Ok();
+            return NoContent();
         }
 
         [Authorize(Roles = "User,Moderator,Admin")]
@@ -213,7 +224,7 @@ namespace TournamentApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTournament(long id)
         {
-            var tournamentItem = await _context.TournamentItems.FindAsync(id);
+            var tournamentItem = await _context.TournamentItems.Include(t => t.participants).Where(t => t.Id == id).FirstOrDefaultAsync();
 
             if (tournamentItem == null)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using TournamentAPI.Models;
 
 namespace TournamentApi.Models
 {
@@ -13,5 +14,6 @@ namespace TournamentApi.Models
         public string Username { get; set; }
         public string Region { get; set; }
         public string InGameName { get; set; }
+        public UserInfo user { get; set; }
     }
 }

@@ -20,8 +20,8 @@ namespace TournamentApi.Controllers
         {
             _context = context;
         }
-        [Authorize(Roles = "User,Moderator,Admin")]
         //GET: api/Team/{id}/Player
+        [Authorize(Roles = "User,Moderator,Admin")]
         [HttpGet("{teamId}/player")]
         public async Task<ActionResult<IEnumerable<Player>>> FindPlayersByTeam(int teamId)
         {
@@ -39,8 +39,8 @@ namespace TournamentApi.Controllers
             return teamItem;
         }
 
-        [Authorize(Roles = "User,Moderator,Admin")]
         //GET: api/Team/{id}/Player/{id}
+        [Authorize(Roles = "User,Moderator,Admin")]
         [HttpGet("{teamId}/player/{playerId}")]
         public async Task<ActionResult<Player>> FindPlayerByIdInTeam(int teamId, int playerId)
         {
@@ -58,21 +58,32 @@ namespace TournamentApi.Controllers
 
             return teamItem;
         }
-        [Authorize(Roles = "User,Admin")]
         //POST: api/Team/{id}/Player/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("{teamId}/player/{playerId}")]
         public async Task<ActionResult<Player>> AddPlayerToTeam(int teamId, int playerId)
         {
             var team = _context.TeamItems.Include(c => c.Players).FirstOrDefault(j => j.Id == teamId);
             var player = _context.PlayerItems.FirstOrDefault(j => j.Id == playerId);
             List<Player> players = team.Players;
-            players.Add(player);
-            team.Players = players;
-            _context.SaveChanges();
-            return Ok();
+            if (players.Contains(player))
+            {
+                return BadRequest("This player already exists in team");
+            }
+            else if(_context.TeamItems.Include(c => c.Players).Where(t => t.Players.Contains(player)).FirstOrDefaultAsync() != null)
+            {
+                return BadRequest("Player is in anotre team");
+            }
+            else
+            {
+                players.Add(player);
+                team.Players = players;
+                _context.SaveChanges();
+                return CreatedAtAction(nameof(GetTeams), team);
+            }
         }
-        [Authorize(Roles = "User,Moderator,Admin")]
         //DELETE: api/Team/{id}/Player/{id}
+        [Authorize(Roles = "Moderator,Admin")]
         [HttpDelete("{teamId}/player/{playerId}")]
         public async Task<ActionResult<Player>> RemovePlayerFromTeam(int teamId, int playerId)
         {
@@ -80,10 +91,10 @@ namespace TournamentApi.Controllers
             var player = _context.PlayerItems.FirstOrDefault(j => j.Id == playerId);
             team.Players.Remove(player);
             _context.SaveChanges();
-            return Ok();
+            return NoContent();
         }
-        [Authorize(Roles = "User,Moderator,Admin")]
         // GET: api/Team
+        [Authorize(Roles = "User,Moderator,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
@@ -92,8 +103,8 @@ namespace TournamentApi.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = "User,Moderator,Admin")]
         // GET: api/Team/{id}
+        [Authorize(Roles = "User,Moderator,Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Team>> GetTeams(long id)
         {
@@ -110,8 +121,8 @@ namespace TournamentApi.Controllers
             return teamItem;
         }
 
-        [Authorize(Roles = "User,Admin")]
         // POST: api/Team
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Team>> PostTeamItem(Team item)
         {
@@ -120,8 +131,8 @@ namespace TournamentApi.Controllers
 
             return CreatedAtAction(nameof(GetTeams), new { id = item.Id }, item);
         }
-        [Authorize(Roles = "User,Admin")]
         // PUT: api/Team/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult PutTeam(long id, Team item)
         {
@@ -141,19 +152,24 @@ namespace TournamentApi.Controllers
                 return NotFound();
             }
         }
-        [Authorize(Roles = "User,Moderator,Admin")]
         // DELETE: api/Team/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTeam(long id)
         {
-            var teanItem = await _context.TeamItems.FindAsync(id);
+            var teamItem = await _context.TeamItems.Include(t => t.Players).Where(i => i.Id == id).FirstOrDefaultAsync();
+            List<Player> players = teamItem.Players;
+            foreach(Player player in players)
+            {
+                teamItem.Players.Remove(player);
+            }
 
-            if (teanItem == null)
+            if (teamItem == null)
             {
                 return NotFound();
             }
 
-            _context.TeamItems.Remove(teanItem);
+            _context.TeamItems.Remove(teamItem);
             await _context.SaveChangesAsync();
 
             return NoContent();

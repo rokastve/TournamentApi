@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TournamentApi.Models;
 
 namespace TournamentAPI.Migrations
 {
     [DbContext(typeof(TournamentContext))]
-    partial class TournamentContextModelSnapshot : ModelSnapshot
+    [Migration("20191111141348_LinkPlayerWithUser")]
+    partial class LinkPlayerWithUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
