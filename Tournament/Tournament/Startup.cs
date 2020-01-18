@@ -27,11 +27,16 @@ namespace TournamentApi
             Configuration = configuration;
         }
 
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => options.AddPolicy("ApiCorsPolicy", builder =>
+            {
+                builder.WithOrigins("http://localhost:3000","http://localhost:44312", "http://localhost:51106").AllowAnyMethod().AllowAnyHeader();
+            }));
             services.AddDbContext<TournamentContext>(opt => opt.UseMySQL("server=elniavabalis.serveriai.lt;database=rostlt_db;user=rostlt_web;password=KtuWebApi19"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -61,7 +66,13 @@ namespace TournamentApi
             {
                 app.UseHsts();
             }
-
+            
+            app.UseCors(builder => builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed((host) => true)
+                .AllowCredentials()
+            );
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvc();

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MySql.Data.EntityFrameworkCore;
-using TournamentAPI.Models;
+using TournamentApi.Models;
 
 namespace TournamentApi.Models
 {
@@ -15,7 +15,6 @@ namespace TournamentApi.Models
         public DbSet<Team> TeamItems { get; set; }
         public DbSet<Player> PlayerItems { get; set; }
         public DbSet<UserInfo> Users { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,7 +22,8 @@ namespace TournamentApi.Models
             modelBuilder.Entity<Team>().ToTable("Team");
             modelBuilder.Entity<Tournament>().ToTable("Tournament");
             modelBuilder.Entity<UserInfo>().ToTable("User");
-            modelBuilder.Entity<RefreshToken>().ToTable("RefreshToken");
+
+
         }
     }
 }

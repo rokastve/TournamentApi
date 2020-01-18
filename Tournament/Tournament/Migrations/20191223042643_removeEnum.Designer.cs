@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TournamentApi.Models;
 
 namespace TournamentAPI.Migrations
 {
     [DbContext(typeof(TournamentContext))]
-    partial class TournamentContextModelSnapshot : ModelSnapshot
+    [Migration("20191223042643_removeEnum")]
+    partial class removeEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,8 +74,6 @@ namespace TournamentAPI.Migrations
                     b.Property<int>("Capacity");
 
                     b.Property<string>("Description");
-
-                    b.Property<string>("Logo");
 
                     b.Property<string>("Name");
 

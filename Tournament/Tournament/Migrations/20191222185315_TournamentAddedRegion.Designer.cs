@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TournamentApi.Models;
 
 namespace TournamentAPI.Migrations
 {
     [DbContext(typeof(TournamentContext))]
-    partial class TournamentContextModelSnapshot : ModelSnapshot
+    [Migration("20191222185315_TournamentAddedRegion")]
+    partial class TournamentAddedRegion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +25,7 @@ namespace TournamentAPI.Migrations
 
                     b.Property<string>("InGameName");
 
-                    b.Property<string>("Region");
+                    b.Property<int>("Region");
 
                     b.Property<long?>("TeamId");
 
@@ -73,13 +75,7 @@ namespace TournamentAPI.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("Logo");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Region");
-
-                    b.Property<DateTime>("Start");
+                    b.Property<int>("Region");
 
                     b.Property<long?>("WinnersId");
 

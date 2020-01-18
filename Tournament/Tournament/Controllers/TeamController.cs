@@ -70,10 +70,10 @@ namespace TournamentApi.Controllers
             {
                 return BadRequest("This player already exists in team");
             }
-            else if(_context.TeamItems.Include(c => c.Players).Where(t => t.Players.Contains(player)).FirstOrDefaultAsync() != null)
-            {
-                return BadRequest("Player is in anotre team");
-            }
+            //else if(_context.TeamItems.Include(c => c.Players).Where(t => t.Players.Contains(player)).FirstOrDefaultAsync() != null)
+            //{
+            //    return BadRequest("Player is in another team");
+            //}
             else
             {
                 players.Add(player);

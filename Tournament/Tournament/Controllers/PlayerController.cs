@@ -29,7 +29,7 @@ namespace TournamentApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
         {
-            return await _context.PlayerItems.ToListAsync();
+            return await _context.PlayerItems.Include(p => p.user).ToListAsync();
         }
 
         // GET: api/Player/{id}

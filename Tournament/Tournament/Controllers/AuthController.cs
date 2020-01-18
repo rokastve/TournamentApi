@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using TournamentApi.Models;
-using TournamentAPI.DTOs;
-using TournamentAPI.Models;
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Cryptography;
 
 namespace TournamentApi.Controllers
 {
@@ -32,13 +27,25 @@ namespace TournamentApi.Controllers
             _configuration = config;
             _context = context;
         }
+        static string sha256(string randomString)
+        {
+            var crypt = new SHA256Managed();
+            string hash = String.Empty;
+            byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
+            foreach (byte theByte in crypto)
+            {
+                hash += theByte.ToString("x2");
+            }
+            return hash;
+        }
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Login([FromBody] UserInfo request)
         {
             UserInfo curr;
-            if ((curr = _context.Users.Where(c => c.Username == request.Username).Where(d => d.Password == request.Password).FirstOrDefault()) != null)
+            if ((curr = _context.Users.Where(c => c.Username == request.Username).Where(d => d.Password == sha256(request.Password)).FirstOrDefault()) != null)
             {
+                curr.Password = null;
                 Player player = _context.PlayerItems.Include(p => p.user).Where(p => p.Id == curr.Id).FirstOrDefault();
                 string playerId;
                 if (player == null)
@@ -62,19 +69,12 @@ namespace TournamentApi.Controllers
                 var claimsPrincipal = new ClaimsPrincipal(identity);
                 // Set current principal
                 Thread.CurrentPrincipal = claimsPrincipal;
-                RefreshToken _refreshTokenObj = new RefreshToken
-                {
-                    Username = request.Username,
-                    Refreshtoken = Guid.NewGuid().ToString(),
-                };
 
                 return Ok(new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    refreshToken = _refreshTokenObj.Refreshtoken
+                    token = new JwtSecurityTokenHandler().WriteToken(token), curr
                 });
             }
-
             return BadRequest("Could not verify username and password");
         }
     }

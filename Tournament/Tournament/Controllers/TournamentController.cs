@@ -21,7 +21,8 @@ namespace TournamentApi.Controllers
         {
             _context = context;
         }
-        [Authorize(Roles = "User,Moderator,Admin")]
+
+        [AllowAnonymous]
         // GET: api/Tournament
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tournament>>> GetTournaments()
@@ -32,7 +33,7 @@ namespace TournamentApi.Controllers
                 .ToListAsync();
         }
 
-        [Authorize(Roles = "User,Moderator,Admin")]
+        [AllowAnonymous]
         // GET: api/Tournament/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Tournament>> GetTournaments(long id)
@@ -207,9 +208,18 @@ namespace TournamentApi.Controllers
 
             if (existingTournament != null)
             {
-                existingTournament.Capacity = item.Capacity;
-                existingTournament.participants = item.participants;
-
+                if(existingTournament.Winners != item.Winners)
+                    existingTournament.Winners = item.Winners;
+                if(existingTournament.Start != item.Start)
+                    existingTournament.Start = item.Start;
+                if(existingTournament.Region != item.Region)
+                    existingTournament.Region = item.Region;
+                if(existingTournament.Name != item.Name)
+                    existingTournament.Name = item.Name;
+                if(existingTournament.Description != item.Description)
+                    existingTournament.Description = item.Description;
+                if(existingTournament.Capacity != item.Capacity)
+                    existingTournament.Capacity = item.Capacity;
                 _context.SaveChanges();
                 return NoContent();
             }

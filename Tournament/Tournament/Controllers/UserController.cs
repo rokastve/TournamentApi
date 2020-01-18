@@ -22,12 +22,16 @@ namespace TournamentApi.Controllers
         {
             _context = context;
         }
+        // POST: api/User
         [AllowAnonymous]
-        // POST: api/Player
         [HttpPost]
         public async Task<ActionResult<UserInfo>> PostUser(UserInfo item)
         {
-            UserInfo newUser = new  UserInfo { Username = item.Username, Role = "User", Password = sha256(item.Password) };
+            if(item.Username.Length == 0 || item.Password.Length == 0)
+            {
+                return BadRequest("Fields can't be empty");
+            }
+            UserInfo newUser = new UserInfo { Username = item.Username, Role = "User", Password = sha256(item.Password) };
             if (_context.Users.Where(u => u.Username == item.Username).FirstOrDefault() == null)
             {
                 _context.Users.Add(newUser);
@@ -37,6 +41,24 @@ namespace TournamentApi.Controllers
             }
             else
                 return BadRequest("User Already Exists");
+        }
+        // POST: api/User/id
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<UserInfo>> PatchUser(long id, UserInfo item)
+        {
+            UserInfo user;
+            if (( user = _context.Users.Where(u => u.Id ==id).FirstOrDefault()) != null)
+            {
+                if (item.Role != "User" && item.Role != "Moderator" && item.Role != "Admin")
+                    return BadRequest("Bad Role");
+                user.Role = item.Role;
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            else
+                return BadRequest("User Does not exist");
         }
 
         static string sha256(string randomString)
